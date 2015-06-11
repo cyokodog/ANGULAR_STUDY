@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>AngularJS Tutorial</title>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.css" rel="stylesheet" type="text/css" media="screen" >
+	<link href="css/style.css" rel="stylesheet" type="text/css" media="screen" >
+</head>
+<body>
+
+<h1><a href="/">AngularJS STUDY</a></h1>
+
+<div class="l-contents">
+	<div class="l-article markdown">
+
+## Inplace Editor(transclude)
+
+inputを自前で用意するパターン。ng-modelを２箇所に書かねばならないAPIがいけてない
+
+また、$scopeの$emitと$onで、入力必須エラーの表示を行っている。isolate scopeによる別scope上の定義でも伝搬可能。
+
+$rollbackViewValue()で変更前の値に戻るか試したが、そーゆーものじゃないらしいｗ
+
+
+<div class="ex-code-prettify">
+
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+</textarea>
+
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-app="app" ng-controller="appCtrl as appCtrl">
+    <inplace-editor ng-model="appCtrl.editor">
+        <input type="text" ng-model="appCtrl.editor"/>
+    </inplace-editor>
+</div>
+</textarea>
+
+
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+var app = angular.module('app', ['ui']);
+app.controller('appCtrl', function($scope){
+    this.editor = 123;
+    $scope.$on('save-err', function(event, mes1, mes2){
+        alert(mes1 + mes2)
+    });
+});
+
+
+var ui = angular.module('ui', []);
+ui.directive('inplaceEditor', function(){
+    return {
+        scope: {
+        },
+        transclude: true,
+        require: ['inplaceEditor', 'ngModel'],
+        template: $('.template').val(),
+        link: function(scope, el, attr, ctrls){
+            ctrls[0].init(el, attr, ctrls[1]);
+        },
+        controllerAs: 'ctrl',
+        controller: function($scope, $timeout){
+            var ctrl = this;
+            ctrl.init = function(el, attr, ngModelCtrl){
+                ctrl.isEdit = false;
+                ctrl.ngModelCtrl = ngModelCtrl;
+                ctrl.el = el;
+            }
+            ctrl.label = {
+                click: function($event){
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    ctrl.isEdit = true;                
+                    $timeout(function(){
+                        ctrl.el.find('input').focus();
+                    },100);
+                }
+            }
+            ctrl.editor = {
+                keydown: function($event){
+                    if($event.which == 13){
+                        $event.preventDefault();
+                        $event.stopPropagation();
+                        if(!ctrl.ngModelCtrl.$viewValue.toString().length){
+                            $scope.$emit('save-err', 'エラーだよ', new Date)
+                            return false;
+                        }
+                        ctrl.isEdit = false;                
+                        $timeout(function(){
+                            ctrl.el.find('.label').focus();
+                        },100);
+                    }
+                }
+            }
+            ctrl.cancel = function($event){
+                $event.preventDefault();
+                $event.stopPropagation();
+                ctrl.ngModelCtrl.$rollbackViewValue();
+                ctrl.isEdit = false;                
+            }
+
+        }
+    }    
+});
+</textarea>
+
+<textarea class="code html template" data-ex-code-prettify-param="{codeType:'html'}">
+<span>
+    <span ng-show="ctrl.isEdit">
+        <span ng-transclude ng-keydown="ctrl.editor.keydown($event)"></span>
+        <button ng-click="ctrl.cancel($event)">cancel</button>
+    </span>
+    <a ng-show="!ctrl.isEdit" href="#" class="label" ng-click="ctrl.label.click($event)" ng-cloak>
+        {{ctrl.ngModelCtrl.$viewValue}}
+    </a>
+</span>
+</textarea>
+
+
+
+
+
+
+
+
+</div>
+
+</div> <!-- l-article -->
+<div class="l-pageNav markdown">
+- ADE(Application Devlopment Environment)
+	- [ng-annotate](ng_annotate.html)
+- built-in-directive
+	- [Directive](directive.html)
+- custom directive
+	- [TODO](todo.html)
+	- [ComboBox](combobox.html)
+	- [Notification](notification.html)
+	- [Rating](rating.html)
+	- [Rating_ngModel](rating_ngmodel.html)
+	- [InplaceEditor](inplace_editor.html)
+	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+
+</div>
+</div> <!-- l-contents -->
+
+
+
+<script src="js/lib/marked/lib/marked.js"></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
+<script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+
+
+
+<script type='text/javascript' src='js/index.js'></script>
+
+
+<script>
+window.here = function(f){
+    return f.toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+}
+</script>
+
+
+</body>
+</html>
+

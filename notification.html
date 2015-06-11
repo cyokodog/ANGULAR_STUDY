@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>AngularJS Tutorial</title>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.css" rel="stylesheet" type="text/css" media="screen" >
+	<link href="css/style.css" rel="stylesheet" type="text/css" media="screen" >
+</head>
+<body>
+
+<h1><a href="/">AngularJS STUDY</a></h1>
+
+<div class="l-contents">
+	<div class="l-article markdown">
+
+## Notification
+
+<div class="ex-code-prettify">
+
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+</textarea>
+
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-app="app" ng-controller="appCtrl as ctrl">
+    <input ng-model="ctrl.newMessage.value" ng-keydown="ctrl.newMessage.keydown($event)"/>
+    <notification ng-repeat="item in ctrl.items" timeout="5000">{{item.message}}</notification>
+</div>
+</textarea>
+
+
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+//usage
+var app = angular.module('app', ['ui']);
+app.controller('appCtrl', function($scope){
+    var ctrl = this;
+    ctrl.items = []
+    ctrl.newMessage = {
+        value: 'hello',
+        keydown: function(event){
+            if(event.which == 13){
+                ctrl.items.push({
+                    message: ctrl.newMessage.value
+                })
+            }
+        }
+    }
+});
+
+//notification
+var ui = angular.module('ui', []);
+ui.directive('notification', function(){
+    return {
+        scope: {
+            timeout: '='
+        },
+        transclude: true,
+        template: $('.template').val(), 
+        replace: true,
+        link: function(scope, el, attr, ctrl){
+            ctrl.init(el, attr)
+        },
+        controllerAs: 'ctrl',
+        controller: function($scope, $timeout){
+            var ctrl = this;
+            ctrl.enable = true;
+            ctrl.init = function(el, attr){
+                $timeout(function(){
+                    ctrl.close();
+                }, $scope.timeout)
+            }
+            ctrl.close = function(){
+                ctrl.enable = false;
+            }
+        }
+    }    
+});
+</textarea>
+
+<textarea class="code html template" data-ex-code-prettify-param="{codeType:'html'}">
+<div class="notification" ng-show="ctrl.enable">
+    <span ng-transclude></span>
+    <span ng-click="ctrl.close()">☓</span>
+</div>
+</textarea>
+
+
+
+
+
+
+
+</div>
+
+</div> <!-- l-article -->
+<div class="l-pageNav markdown">
+- ADE(Application Devlopment Environment)
+	- [ng-annotate](ng_annotate.html)
+- built-in-directive
+	- [Directive](directive.html)
+- custom directive
+	- [TODO](todo.html)
+	- [ComboBox](combobox.html)
+	- [Notification](notification.html)
+	- [Rating](rating.html)
+	- [Rating_ngModel](rating_ngmodel.html)
+	- [InplaceEditor](inplace_editor.html)
+	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+
+</div>
+</div> <!-- l-contents -->
+
+
+
+<script src="js/lib/marked/lib/marked.js"></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
+<script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+
+
+
+<script type='text/javascript' src='js/index.js'></script>
+
+
+<script>
+window.here = function(f){
+    return f.toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+}
+</script>
+
+
+</body>
+</html>
+

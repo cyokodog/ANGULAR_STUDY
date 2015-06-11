@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>AngularJS Tutorial</title>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.css" rel="stylesheet" type="text/css" media="screen" >
+	<link href="css/style.css" rel="stylesheet" type="text/css" media="screen" >
+</head>
+<body>
+
+<h1><a href="/">AngularJS STUDY</a></h1>
+
+<div class="l-contents">
+	<div class="l-article markdown">
+
+## Built in Directive
+
+<div ng-app="demo">
+
+
+
+
+
+<div class="ex-code-prettify">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+window.demo = angular.module('demo', ['ngSanitize']);
+</textarea>
+</div>
+
+
+
+
+### ngBind
+
+エクスプレッション(｛｛ 文字列 ｝｝)がちらっと表示されちゃうのをなんとかしたい場合は ng-bind を使う。マークアップはエスケープされる。
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-init="bind={greeting:'<h1>Hello Angular</h1>'}" ng-bind="bind.greeting"></div>
+</textarea>
+</div>
+
+
+
+
+
+### ngBindTemplate
+
+ngBindだとデータ値しか反映させられないけど、データの前後にちょい加工したい場合は ng-bind-templateを使う
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<input ng-init="bindTemp = {myName:'Taro'}" ng-model="bindTemp.myName"/>
+<div ng-bind-template="My Name is {{bindTemp.myName}}"></div>    
+</textarea>
+</div>
+
+
+
+ ### ngBindHtml
+
+ngBindによりマークアップをバインドしようとしても xss 対策が作動しエスケープされてしまうが、ngSanitizeとngBindHtmlを使うことでエスケープを回避できる。
+ 
+またlinkyフィルターを併用することで http:// の記述をリンクに変更できる。
+
+ただし、scriptタグのように安全でないタグは取り除かれる仕様。
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="bindHtmlCtrl as ctrl">
+    <div ng-bind-html="ctrl.markup"></div>
+    <div ng-bind-html="ctrl.link | linky"></div>
+    <div ng-bind-html="ctrl.script"></div>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo').controller('bindHtmlCtrl', function($scope){
+    angular.extend(this,{
+        markup: '<ul><li>これは ul - li です</li></ul>',
+        link: 'http://www.cyokodog.net',
+        script: '<script>alert(123)</script>scriptタグを挿入してるがエスケープされてしまう'
+    })
+})
+</textarea>
+</div>
+
+
+### SCE(Strict Contextual Escaping)
+
+ngSanitize を使用しても script タグのような安全でないものは取り除かれてしまうが、SCEで安全を保障することで有効化できる
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="sceCtrl as ctrl">
+    <div ng-bind-html="ctrl.script"></div>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo').controller('sceCtrl', function($sce){
+    angular.extend(this,{
+        script: 
+            $sce.trustAs(
+                $sce.HTML,
+                '<div class="sceDemo"></div><script>$(".sceDemo").html("Script OK")</script>'
+            )
+    })
+
+})
+</textarea>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div> <!-- l-article -->
+<div class="l-pageNav markdown">
+- ADE(Application Devlopment Environment)
+	- [ng-annotate](ng_annotate.html)
+- built-in-directive
+	- [Directive](directive.html)
+- custom directive
+	- [TODO](todo.html)
+	- [ComboBox](combobox.html)
+	- [Notification](notification.html)
+	- [Rating](rating.html)
+	- [Rating_ngModel](rating_ngmodel.html)
+	- [InplaceEditor](inplace_editor.html)
+	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+
+</div>
+</div> <!-- l-contents -->
+
+
+
+<script src="js/lib/marked/lib/marked.js"></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
+<script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+
+
+
+<script type='text/javascript' src='js/index.js'></script>
+
+
+<script>
+window.here = function(f){
+    return f.toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+}
+</script>
+
+
+</body>
+</html>
+

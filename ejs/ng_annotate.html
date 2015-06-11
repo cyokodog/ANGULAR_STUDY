@@ -1,0 +1,38 @@
+<% include common/_head %>
+
+# ng-annotate
+
+dependency annotationを自動的に付加してくれる
+
+- https://github.com/olov/ng-annotate
+- https://www.npmjs.com/package/gulp-ng-annotate
+
+install
+
+	$ npm install --save-dev gulp-ng-annotate
+
+gulpfile.js
+
+	var gulp = require('gulp');
+	var ngAnnotate = require('gulp-ng-annotate');
+	 
+	gulp.task('default', function () {
+	    return gulp.src('src/app.js')
+	        .pipe(ngAnnotate())
+	        .pipe(gulp.dest('dist'));
+	});
+
+before
+
+	/* @ngInject */
+	function controller($scope) {
+	}
+
+after
+
+	/* @ngInject */
+	function controller($scope) {
+	}
+	controller.$inject = ["$scope"];
+
+<% include common/_foot %>

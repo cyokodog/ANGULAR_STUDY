@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>AngularJS Tutorial</title>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.css" rel="stylesheet" type="text/css" media="screen" >
+	<link href="css/style.css" rel="stylesheet" type="text/css" media="screen" >
+</head>
+<body>
+
+<h1><a href="/">AngularJS STUDY</a></h1>
+
+<div class="l-contents">
+	<div class="l-article markdown">
+
+## Inplace Editor
+
+<div class="ex-code-prettify">
+
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+</textarea>
+
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-app="app" ng-controller="appCtrl as ctrl">
+    <inplace-editor editor="ctrl.editor"/>
+</div>
+</textarea>
+
+
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+var app = angular.module('app', ['ui']);
+app.controller('appCtrl', function($scope){
+    var ctrl = this;
+    ctrl.editor = 'hello'
+});
+
+
+var ui = angular.module('ui', []);
+ui.directive('inplaceEditor', function(){
+    return {
+        scope: {
+            editor: '='
+        },
+        template: $('.template').val(),
+        link: function(scope, el, attr, ctrl){
+            ctrl.init(el, attr, ctrl);
+        },
+        controllerAs: 'ctrl',
+        controller: function($scope, $timeout){
+            var ctrl = this;
+            ctrl.init = function(el, attr, editorCtrl){
+                ctrl.el = el;
+                ctrl.isEdit = false;                
+            }
+            ctrl.toggleMode = function($event){
+                ctrl.isEdit = !ctrl.isEdit;                
+                $event.preventDefault();
+                $event.stopPropagation();
+                return false;
+            }
+            ctrl.label = {
+                click: function($event){
+                    ctrl.toggleMode($event);
+                    $timeout(function(){
+                        ctrl.el.find('.editor').focus();
+                    },100);
+                }
+            }
+            ctrl.editor = {
+                keydown: function($event){
+                    if($event.which == 13){
+                        ctrl.toggleMode($event);
+                        $timeout(function(){
+                            ctrl.el.find('.label').focus();
+                        },100);
+                    }
+                }
+            }
+
+        }
+    }    
+});
+</textarea>
+
+<textarea class="code html template" data-ex-code-prettify-param="{codeType:'html'}">
+<span>
+    <input ng-show="ctrl.isEdit" ng-model="editor" class="editor" ng-keydown="ctrl.editor.keydown($event)"/>
+    <a ng-show="!ctrl.isEdit" href="#" class="label" ng-click="ctrl.label.click($event)">{{editor}}</a>
+</span>
+</textarea>
+
+
+
+
+
+
+
+</div>
+
+</div> <!-- l-article -->
+<div class="l-pageNav markdown">
+- ADE(Application Devlopment Environment)
+	- [ng-annotate](ng_annotate.html)
+- built-in-directive
+	- [Directive](directive.html)
+- custom directive
+	- [TODO](todo.html)
+	- [ComboBox](combobox.html)
+	- [Notification](notification.html)
+	- [Rating](rating.html)
+	- [Rating_ngModel](rating_ngmodel.html)
+	- [InplaceEditor](inplace_editor.html)
+	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+
+</div>
+</div> <!-- l-contents -->
+
+
+
+<script src="js/lib/marked/lib/marked.js"></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
+<script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+
+
+
+<script type='text/javascript' src='js/index.js'></script>
+
+
+<script>
+window.here = function(f){
+    return f.toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+}
+</script>
+
+
+</body>
+</html>
+

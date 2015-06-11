@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>AngularJS Tutorial</title>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.css" rel="stylesheet" type="text/css" media="screen" >
+	<link href="css/style.css" rel="stylesheet" type="text/css" media="screen" >
+</head>
+<body>
+
+<h1><a href="/">AngularJS STUDY</a></h1>
+
+<div class="l-contents">
+	<div class="l-article markdown">
+
+## TODO アプリ
+
+<div class="ex-code-prettify">
+
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+li.closed-true .title{
+    color: gray;
+    text-decoration: line-through;
+}
+</textarea>
+
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-app="taskApp">
+    <div ng-controller="TaskCtrl">
+        <form ng-submit="addTask()">
+            <input ng-model="taskTitle" placeholder="タスクを入力してください" type="text">
+            <span>{{error}}</span>
+        </form>
+        <ul class="taskList">
+            <li ng-repeat="task in tasks" class="closed-{{task.closed}}">
+                <input type="checkbox" ng-model="task.closed">
+                <span class="title">{{task.title}}</span>
+                <a class="del" ng-click="delTask($event, $index)" href="#">x</a>
+            </li>
+        </ul>
+        <button class="clear" ng-click="delAllTask()">All Delete</button>
+    </div>
+</div>
+</textarea>
+
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('taskApp',[]).
+    controller('TaskCtrl', function($scope){
+        $scope.taskTitle = '';
+        $scope.tasks = [];
+        $scope.addTask = function(){
+            if(!$scope.taskTitle.length){
+                $scope.error = 'タスクが入力されてません！'
+                return;
+            }
+            $scope.tasks.push({
+                title: $scope.taskTitle,
+                closed: false
+            });
+            $scope.taskTitle = '';
+            $scope.error = '';
+        }
+        $scope.delTask = function($event, $index){
+            $event.preventDefault();
+            $scope.tasks.splice($index, 1)
+        }
+        $scope.delAllTask = function(){
+            if(confirm('タスクを全て削除しますか？')){
+                $scope.tasks = [];
+            }
+        }
+    });
+</textarea>
+
+</div>
+
+</div> <!-- l-article -->
+<div class="l-pageNav markdown">
+- ADE(Application Devlopment Environment)
+	- [ng-annotate](ng_annotate.html)
+- built-in-directive
+	- [Directive](directive.html)
+- custom directive
+	- [TODO](todo.html)
+	- [ComboBox](combobox.html)
+	- [Notification](notification.html)
+	- [Rating](rating.html)
+	- [Rating_ngModel](rating_ngmodel.html)
+	- [InplaceEditor](inplace_editor.html)
+	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+
+</div>
+</div> <!-- l-contents -->
+
+
+
+<script src="js/lib/marked/lib/marked.js"></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
+<script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+
+
+
+<script type='text/javascript' src='js/index.js'></script>
+
+
+<script>
+window.here = function(f){
+    return f.toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+}
+</script>
+
+
+</body>
+</html>
+

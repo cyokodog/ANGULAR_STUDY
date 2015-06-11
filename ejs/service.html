@@ -1,0 +1,160 @@
+<% include common/_head %>
+
+<div ng-app="demo">
+
+<div class="ex-code-prettify">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo', []);
+</textarea>
+</div>
+
+
+## value / constant
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="valueCtrl as vm">
+version: {{vm.version}}
+<ul>
+    <li ng-repeat="row in vm.programming">{{row.id}}</li>
+</ul>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').
+    value('programming', [
+        {id: 'JavaScript'},
+        {id: 'Java'},
+        {id: 'Ruby'}
+    ]).
+    constant('VERSION', '1.0.0').
+    controller('valueCtrl', function(programming, VERSION){
+        this.version = VERSION;
+        this.programming = programming;
+    })
+</textarea>
+</div>
+
+## factory
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="factoryCtrl as vm">
+    <span>{{vm.calc.result}}</span>
+    <button ng-click="vm.calc.increment()">+1</button>
+    <button ng-click="vm.calc.pow()">{{vm.calc.result}} * {{vm.calc.result}}</button>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').
+    factory('calc', function(){
+        return {
+            result: 0,
+            increment: function(){
+                this.result++;
+            },
+            pow: function(){
+                this.result = Math.pow(this.result,2);
+            }
+        }        
+    }).
+    controller('factoryCtrl', function(calc){
+        this.calc = calc
+    })
+</textarea>
+</div>
+
+
+## service
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="serviceCtrl as vm">
+    <span>{{vm.calc.result}}</span>
+    <button ng-click="vm.calc.increment()">+1</button>
+    <button ng-click="vm.calc.pow()">{{vm.calc.result}} * {{vm.calc.result}}</button>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+function calcService (){};
+calcService.prototype = {
+    result: 0,
+    increment: function(){
+        this.result++;
+    },
+    pow: function(){
+        this.result = Math.pow(this.result,2);
+    }
+};
+angular.module('demo').
+    service('calcService', calcService).
+    controller('serviceCtrl', function(calcService){
+        this.calc = calcService
+    })
+</textarea>
+</div>
+
+
+
+## provider
+
+value、constant、factory、serviceはproviderのショートカット。
+providerで登録したサービスは、実行前に設定が可能。
+
+angularでは実行前の設定はconfigで行う。
+例えば$httpは、providerによって定義されたサービスのため以下のようにして実行前のデフォルトの設定を変更することができる。
+
+
+    app.config(function($httpProvider) {
+      $httpProvider.defaults.headers.common['X-Foo'] = 'bar';
+    });
+
+これと同じノリで前述の calc factory を初期設定可能な形で定義してみる
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="providerCtrl as vm">
+    <span>{{vm.calc.result}}</span>
+    <button ng-click="vm.calc.increment()">+1</button>
+    <button ng-click="vm.calc.pow()">{{vm.calc.result}} * {{vm.calc.result}}</button>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').
+   provider('calc2', function(){
+        var result = 0;
+        this.setDefaultResult = function(defaultResult){
+            result = defaultResult;
+        }
+        this.$get = function(){
+            return {
+                result: result,
+                increment: function(){
+                    this.result++;
+                },
+                pow: function(){
+                    this.result = Math.pow(this.result,2);
+                }
+            }        
+        }
+    }).
+    constant('DEFAULT_RESULT', 4).
+    config(function(calc2Provider, DEFAULT_RESULT){
+        calc2Provider.setDefaultResult(DEFAULT_RESULT)
+    }).
+    controller('providerCtrl', function(calc2){
+        this.calc = calc2
+    })
+
+ </textarea>
+</div>
+
+
+
+
+</div>
+<% include common/_foot %>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>AngularJS Tutorial</title>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.css" rel="stylesheet" type="text/css" media="screen" >
+	<link href="css/style.css" rel="stylesheet" type="text/css" media="screen" >
+</head>
+<body>
+
+<h1><a href="/">AngularJS STUDY</a></h1>
+
+<div class="l-contents">
+	<div class="l-article markdown">
+
+## Rating ngModel
+
+ngModelの値取得、セットは ctrl.$viewValue, ctrl.$setViewValue() を使用。また、値参照可能なタイミングは ctrl.$render イベント内となる。
+
+- 複数の ngModel が必要な場合はどうする？（配列指定、別名指定ではエラーになってしまう）
+
+<div class="ex-code-prettify">
+
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+</textarea>
+
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-app="app" ng-controller="appCtrl as ctrl">
+    <input ng-init="point=2" ng-model="point"/><rating max-rate="5" ng-model="point"></rating><br/>
+</textarea>
+
+
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+var app = angular.module('app', ['ui']);
+app.controller('appCtrl', function($scope){
+    var ctrl = this;
+    ctrl.point=3
+});
+
+
+var ui = angular.module('ui', []);
+ui.directive('rating', function(){
+    return {
+        scope: {
+            maxRate: '@'
+        },
+        require: ['rating','ngModel'],
+        template: $('.template').val(),
+        link: function(scope, el, attr, ctrls){
+            ctrls[0].init(el, attr, ctrls[1]);
+        },
+        controllerAs: 'ctrl',
+        controller: function($scope){
+            var ctrl = this;
+            var initItem = function(){
+                ctrl.items = [];
+                for(var i = 0; i < $scope.maxRate; i++) ctrl.items.push({mark: ctrl.ngModelCtrl.$viewValue > i ? '★' : '☆'});
+            }
+            ctrl.init = function(el, attr, ngModelCtrl){
+                ctrl.ngModelCtrl = ngModelCtrl;
+                ctrl.ngModelCtrl.$render = function(){
+                    initItem();
+                }
+                ctrl.ngModelCtrl.$formatters.push(function(rate){
+                    return (rate > $scope.maxRate ? $scope.maxRate : (rate < 1 ? 0 : rate) )
+                });
+            }
+            ctrl.mark = {
+                click: function(rate){
+                    ctrl.ngModelCtrl.$setViewValue(rate)
+                    initItem();
+                }
+            }
+
+        }
+    }    
+});
+</textarea>
+
+<textarea class="code html template" data-ex-code-prettify-param="{codeType:'html'}">
+<span>
+<a ng-repeat="item in ctrl.items" ng-click="ctrl.mark.click($index+1)">{{item.mark}}</a>
+</span>
+</textarea>
+
+
+
+
+
+
+
+</div>
+
+</div> <!-- l-article -->
+<div class="l-pageNav markdown">
+- ADE(Application Devlopment Environment)
+	- [ng-annotate](ng_annotate.html)
+- built-in-directive
+	- [Directive](directive.html)
+- custom directive
+	- [TODO](todo.html)
+	- [ComboBox](combobox.html)
+	- [Notification](notification.html)
+	- [Rating](rating.html)
+	- [Rating_ngModel](rating_ngmodel.html)
+	- [InplaceEditor](inplace_editor.html)
+	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+
+</div>
+</div> <!-- l-contents -->
+
+
+
+<script src="js/lib/marked/lib/marked.js"></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
+<script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+
+
+
+<script type='text/javascript' src='js/index.js'></script>
+
+
+<script>
+window.here = function(f){
+    return f.toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+}
+</script>
+
+
+</body>
+</html>
+

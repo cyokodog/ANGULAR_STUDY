@@ -1,0 +1,82 @@
+<% include common/_head %>
+
+## Notification
+
+<div class="ex-code-prettify">
+
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+</textarea>
+
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-app="app" ng-controller="appCtrl as ctrl">
+    <input ng-model="ctrl.newMessage.value" ng-keydown="ctrl.newMessage.keydown($event)"/>
+    <notification ng-repeat="item in ctrl.items" timeout="5000">{{item.message}}</notification>
+</div>
+</textarea>
+
+
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+//usage
+var app = angular.module('app', ['ui']);
+app.controller('appCtrl', function($scope){
+    var ctrl = this;
+    ctrl.items = []
+    ctrl.newMessage = {
+        value: 'hello',
+        keydown: function(event){
+            if(event.which == 13){
+                ctrl.items.push({
+                    message: ctrl.newMessage.value
+                })
+            }
+        }
+    }
+});
+
+//notification
+var ui = angular.module('ui', []);
+ui.directive('notification', function(){
+    return {
+        scope: {
+            timeout: '='
+        },
+        transclude: true,
+        template: $('.template').val(), 
+        replace: true,
+        link: function(scope, el, attr, ctrl){
+            ctrl.init(el, attr)
+        },
+        controllerAs: 'ctrl',
+        controller: function($scope, $timeout){
+            var ctrl = this;
+            ctrl.enable = true;
+            ctrl.init = function(el, attr){
+                $timeout(function(){
+                    ctrl.close();
+                }, $scope.timeout)
+            }
+            ctrl.close = function(){
+                ctrl.enable = false;
+            }
+        }
+    }    
+});
+</textarea>
+
+<textarea class="code html template" data-ex-code-prettify-param="{codeType:'html'}">
+<div class="notification" ng-show="ctrl.enable">
+    <span ng-transclude></span>
+    <span ng-click="ctrl.close()">☓</span>
+</div>
+</textarea>
+
+
+
+
+
+
+
+</div>
+
+<% include common/_foot %>

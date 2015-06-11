@@ -1,0 +1,111 @@
+<% include common/_head %>
+
+## Combo Box
+
+<div class="ex-code-prettify">
+
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+
+.combobox{
+    display: inline-block;
+    vertical-align: top;
+}
+</textarea>
+
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-app="app" ng-controller="appCtrl as ctrl">
+    <combobox ng-repeat-start="item in ctrl.items" list="item.list" selected-item="item.selected"></combobox><!--
+    --><button ng-repeat-end ng-click="ctrl.show(item)">show</button>
+</div>
+</textarea>
+
+
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+//usage
+var app = angular.module('app', ['ui']);
+app.controller('appCtrl', function($scope){
+    var o = this;
+    o.items = [
+        {
+            list: ['java', 'javascript'],
+            selected: 'ruby'
+        },
+        {
+            list: ['struts', 'jquery'],
+            selected: 'jquery'
+        }
+    ]
+    o.show = function(item){
+        alert(item.selected)
+    }
+});
+
+//combobox
+var ui = angular.module('ui', []);
+ui.directive('combobox', function(){
+    return {
+        scope: {
+            selectedItem: '=',
+            list: '='
+        },
+        template: $('.template').val(), 
+
+        link: function(scope, el, attr, ctrl){
+            ctrl.isFocus = false;
+        },
+        controllerAs: 'ctrl',
+        controller: function($scope,$timeout){
+            var ctrl = this;
+            ctrl.input = {
+                focus: function(){
+                    ctrl.isFocus = true;
+                },
+                blur: function(){
+                    $timeout(function(){
+                        ctrl.isFocus = false;
+                    },10)
+                }
+            }
+            ctrl.item = {
+                click: function($event, item){
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    $scope.selectedItem = item;
+                    ctrl.isFocus = false;
+                }
+            }
+        }
+    }
+});
+
+
+
+
+
+</textarea>
+
+
+
+
+
+<textarea class="code html template" data-ex-code-prettify-param="{codeType:'html'}">
+<div class="combobox">
+    <input value="{{selectedItem}}" ng-focus="ctrl.input.focus()" ng-blur="ctrl.input.blur()"/>
+    <ul ng-show="ctrl.isFocus" class="combobox__list">
+        <li ng-repeat="item in list"><a href="#" ng-click="ctrl.item.click($event, item)">{{item}}</a></li>
+    </ul>
+</div>
+</textarea>
+
+
+
+
+
+
+
+
+
+</div>
+
+<% include common/_foot %>

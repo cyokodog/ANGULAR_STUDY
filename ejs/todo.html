@@ -1,0 +1,64 @@
+<% include common/_head %>
+
+## TODO アプリ
+
+<div class="ex-code-prettify">
+
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+li.closed-true .title{
+    color: gray;
+    text-decoration: line-through;
+}
+</textarea>
+
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-app="taskApp">
+    <div ng-controller="TaskCtrl">
+        <form ng-submit="addTask()">
+            <input ng-model="taskTitle" placeholder="タスクを入力してください" type="text">
+            <span>{{error}}</span>
+        </form>
+        <ul class="taskList">
+            <li ng-repeat="task in tasks" class="closed-{{task.closed}}">
+                <input type="checkbox" ng-model="task.closed">
+                <span class="title">{{task.title}}</span>
+                <a class="del" ng-click="delTask($event, $index)" href="#">x</a>
+            </li>
+        </ul>
+        <button class="clear" ng-click="delAllTask()">All Delete</button>
+    </div>
+</div>
+</textarea>
+
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('taskApp',[]).
+    controller('TaskCtrl', function($scope){
+        $scope.taskTitle = '';
+        $scope.tasks = [];
+        $scope.addTask = function(){
+            if(!$scope.taskTitle.length){
+                $scope.error = 'タスクが入力されてません！'
+                return;
+            }
+            $scope.tasks.push({
+                title: $scope.taskTitle,
+                closed: false
+            });
+            $scope.taskTitle = '';
+            $scope.error = '';
+        }
+        $scope.delTask = function($event, $index){
+            $event.preventDefault();
+            $scope.tasks.splice($index, 1)
+        }
+        $scope.delAllTask = function(){
+            if(confirm('タスクを全て削除しますか？')){
+                $scope.tasks = [];
+            }
+        }
+    });
+</textarea>
+
+</div>
+
+<% include common/_foot %>

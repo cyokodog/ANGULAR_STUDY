@@ -1,0 +1,127 @@
+<% include common/_head %>
+<div ng-app="demo">
+
+# Sample
+
+
+
+<div class="ex-code-prettify">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo', []);
+</textarea>
+</div>
+
+
+## bindToController Test
+
+bindToController 、directiveのcontrollerに親scopeの値が自動バインドされるとかいう仕様。1.3.0から利用可とあるので試したがうまくいかず
+
+- https://github.com/johnpapa/angular-styleguide/blob/master/i18n/ja-JP.md#style-y076
+
+以下では1.4からとある。どっちだろ？
+
+- [AngularJS - Angular1.4から使えるbindToControllerが便利 - Qiita](http://qiita.com/miseyu/items/10a4252f8a001019f5af)
+
+ここに書いてあった
+
+- http://qiita.com/armorik83/items/5542daed0c408cb9f605#bindtocontroller%E3%81%AF%E4%BD%BF%E3%81%A3%E3%81%A6%E3%82%82%E3%81%84%E3%81%84%E3%81%A7%E3%81%99%E3%81%8B
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="bindToCtrl">
+<bind-to-directive bar="bar"/>
+</div>
+
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').
+controller('bindToCtrl', function($scope){
+	$scope.bar = '(bar)';
+}).
+directive('bindToDirective', function(){
+	return {
+		scope: {
+			bar: '='
+		},
+		template: $('.bindToTempl').val(),
+		controllerAs: 'vm',
+		bindToController: true
+	}
+});
+</textarea>
+<textarea class="code html bindToTempl" data-ex-code-prettify-param="{codeType:'html'}">
+<span>
+bar is {{bar}}.<br/>
+foo is {{vim.foo}}.
+</span>
+</textarea>
+
+</div>
+
+
+
+
+## Element Destroy Test
+
+el.on('$destroy') の実行条件テスト。element を remove すると起動
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div el-destroy></div> <button ng-click="del()">del</button>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').directive('elDestroy', function(){
+	return {
+		template: '<div>hoge</div>',
+		link: function($scope, el, attr, ctrl){
+			el.on('$destroy', function(){
+				alert('element destroy')
+			})
+			$scope.del = function(){
+			//	$applyするとこける？？なぜ？
+			//	$scope.$apply(function(){
+					el.remove();
+			//	})
+			}
+		}
+	}
+});
+</textarea>
+</div>
+
+## Scope Destroy Test
+
+<div class="ex-code-prettify">
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+</textarea>
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="scopeDestroy1 as ctrl">
+    <div ng-repeat="i in hoge">
+    	<span ng-controller="scopeDestroy2">{{i}}</span>
+    </div>
+    <button ng-click="ctrl.splice()">del</button>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo')
+	.controller('scopeDestroy1', function($scope){
+	    var ctrl = this;
+	    $scope.hoge = ['a','b']
+	    ctrl.splice=function(){
+	        $scope.hoge.splice(1,1)
+	    }
+	})
+	.controller('scopeDestroy2', function($scope){
+		$scope.$on('$destroy', function(){
+			alert('scope destory')
+		})
+	})
+	;
+</textarea>
+</div>
+
+
+</div>
+<% include common/_foot %>
