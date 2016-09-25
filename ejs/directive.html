@@ -88,7 +88,7 @@ angular.module('demo').controller('sceCtrl', function($sce){
         script: 
             $sce.trustAs(
                 $sce.HTML,
-                '<div class="sceDemo"></div><script>$(".sceDemo").html("Script OK")</script>'
+                '<div class="sceDemo"></div><script>$(".sceDemo").html("This Text is Written by JavaScript.")</script>'
             )
     })
 

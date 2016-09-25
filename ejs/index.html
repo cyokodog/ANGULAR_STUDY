@@ -1,8 +1,53 @@
 <% include common/_head %>
+<div ng-app="demo">
+
+<div class="ex-code-prettify" style="display:none">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo', []);
+</textarea>
+</div>
+
+## メモ
+
+### ui-router
+
+#### $stateChangeStart
+
+遷移が始まったときに発火する
+
+[AngularJS - AngularUI Router Wiki - Home.md の日本語訳 - Qiita](http://qiita.com/damele0n/items/3ee2e8c9adc2520cc0b3#3-7)
+
+#### $state.includes
+
+    if(!$state.includes(KBA_CAR_DETAIL_STATES.aggregate.mode)) return;
+
+
+
+### JSON の ng-repeat で key,value を取得する方法
+
+    <ul>
+      <li ng-repeat="(key,value) in {'foo':'bar'}">{{key}}:{{value}}</li>
+    </ul>
 
 ## あとで調べる
 
-### run 
+### watch
+
+例えばあるプルダウンの値の変化に応じ、他の入力項目をdisableにしたいという時、プルダウンのイベントにフックせず、$watchでプルダウンのモデルを監視する。（よいのかどうかわからないが、担当案件ではこうしてる）
+
+    scope.$watch('model', function(newVal) {
+        if(!newVal) scope.clickable = false;
+    }, true);
+
+ボタン disable の制御は css の　poineterEvents　を利用する手もある
+
+    scope.handleSubmitButtonStats = function() {
+      return scope.submittable ?
+        { color: '#333', poineterEvents: 'auto' } :
+        { color: '#ccc', pointerEvents: 'none' };
+    };
+
+### run
 
     angular
         .module('app')
@@ -47,9 +92,213 @@ https://github.com/johnpapa/angular-styleguide/blob/master/i18n/ja-JP.md#naming
 - テストファイル
     - avengers.controller.spec.js
 
+
+コントローラー
+
+    // avengers.controller.js
+    angular
+        .module
+        .controller('AvengersController', AvengersController);
+    function AvengersController() { }
+
+ファクトリー（サービス）
+
+    // logger.service.js
+    angular
+        .module
+        .factory('logger', logger);
+    function logger() { }
+
+ディレクティブ
+
+    // avenger-profile.directive.js
+    angular
+        .module
+        .directive('xxAvengerProfile', xxAvengerProfile);
+    // usage is <xx-avenger-profile> </xx-avenger-profile>
+    function xxAvengerProfile() { }
+
+モジュール
+
+    app.module.js
+    admin.module.js
+
+コンフィグ
+
+    app.config.js
+    admin.module.js
+
+ルータ
+
+    app.route.js
+    admin.route.js
+
+
+
+
 ## モジュール構成
 
 https://github.com/johnpapa/angular-styleguide/blob/master/i18n/ja-JP.md#application-structure-lift-principle
+
+
+
+## ng-repeatの重複キー対策
+
+ng-repeat使用時 キーが重複してるエラーになるので track by $index を使用する
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<ul ng-controller="dupKeyCtrl as vm">
+    <li ng-repeat="item in vm.list track by $index">{{item}}</li>
+</ul>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').controller('dupKeyCtrl', function(){
+    this.list = [];
+    this.list.push('A')
+    this.list.push('B')
+    this.list.push('B')
+})
+</textarea>
+</div>
+
+
+## directive のコールバック(isolate scope の &)でパラメータを受け取る方法
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="directiveParamCtrl as vm">
+    <directive-param callback="vm.callback(promise)"/>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+
+angular.module('demo')
+    .controller('directiveParamCtrl', function(){
+        this.callback = function(promise){
+            promise.then(function(param){
+                console.log(param.time, param.mes) // 3, 3秒経ちました
+            })
+        }
+    })
+    .directive('directiveParam', function($timeout, $q){
+        return {
+            scope: {
+                callback: '&'
+            },
+            template: '<div>directiveParam</div>',
+            link: function(scope,el){
+                var s = 3;
+                var defer = $q.defer();
+                $timeout(function(){
+                    var mes = s + '秒経ちました';
+                    el.text(mes)
+                    defer.resolve({
+                        time: s,
+                        mes: mes
+                    });
+                },s * 1000)
+                scope.callback({promise: defer.promise})
+            }
+        }
+    });
+</textarea>
+</div>
+
+
+## 動的にDOM上に追加したディレクティブをパースさせる方法
+
+$compile(el.contents())($scope); する
+
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="asyncDirectiveCtrl as ctrl">
+    <button ng-click="ctrl.get1()">失敗</button>
+    <button ng-click="ctrl.get2()">成功</button>
+    <div class="asyncDirectiveResult"></div>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').
+    controller('asyncDirectiveCtrl', function($compile, $scope){
+        this.get1 = function(){
+            return angular.element('.asyncDirectiveResult').html('<hello>Taro</hello>')
+        }
+        this.get2 = function(){
+            var el = this.get1();
+            $compile(el.contents())($scope);
+        }
+    }).
+    directive('hello', function($compile){
+        return {
+            link: function(scope, el, attr){
+                el.html('Hello ' + el.text() + ' !')
+            }
+        }
+    })
+;
+</textarea>
+</div>
+
+
+
+
+## bindToController
+
+directive 定義において bindToController を使うと $scope で管理してるモデルが contoroller に移動する。
+bindToController を使用する際は、空でもよいので controller の定義が必須となる。
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="bindToCtrl as vm">
+    <h4>bindToController: true</h4>
+    <bind-to-true-directive bar="bar"></bind-to-true-directive>
+    <h4>bindToController: false</h4>
+    <bind-to-false-directive bar="bar"></bind-to-false-directive>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').
+    controller('bindToCtrl', function($scope){
+        $scope.bar = '(bar)';
+    }).
+    directive('bindToTrueDirective', function(){
+        return {
+            scope: {
+                bar: '='
+            },
+            template: $('.bindToTempl').val(),
+            controllerAs: 'vm',
+            controller: function(){
+                //bindToControllerを使用する場合は、空でも良いのでcontrollerの定義が必要
+            },
+            bindToController: true
+        }
+    }).
+    directive('bindToFalseDirective', function(){
+        return {
+            scope: {
+                bar: '='
+            },
+            template: $('.bindToTempl').val(),
+            controllerAs: 'vm',
+            bindToController: false
+        }
+    });
+</textarea>
+<textarea class="code html bindToTempl" data-ex-code-prettify-param="{codeType:'html'}">
+<span>
+controller.bar is {{vm.bar}}.<br/>
+$scope.bar is {{bar}}.<br/>
+</span>
+</textarea>
+</div>
+
+
 
 
 ## イベントのバインドタイミングの注意
@@ -60,10 +309,15 @@ directive の link 処理時は DOM 構築終了後というが、ng-repeat 等�
 
 結論、素直に html 要素上に ng-click とか書いたほうが無難。
 
+バニラJS の onload 相当のタイミングはどうとるか？run()にて$timeoutといったところか？そもそもanglarに絡まないDOMならwindow.onloadでいいか・・？
+
+run() は「injectorがすべてのモジュールをロード完了時に実行すべき内容を登録。アプリケーションの初期化に使用する。」とのこと
+
+
 <div class="ex-code-prettify">
 
 <textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
-<div ng-app="bindTimingTest" class="bindTimingTest">
+<div class="bindTimingTest">
     <bind-timing-parts count="[1,2,3]"/>
 </div>
 </textarea>
@@ -71,36 +325,44 @@ directive の link 処理時は DOM 構築終了後というが、ng-repeat 等�
 
 <textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
 //<script>
-var app = angular.module('bindTimingTest', []);
-app.directive('bindTimingParts', function(){
-    return {
-        scope: {
-            count: '='
-        },
-        template:   '<span class="title">count = </span>'+
-                    '<span class="count" ng-repeat="i in count">{{i}} </span>' +
-                    '<button ng-click="count = [4,5,6]">4 5 6 | ng-click</button>' +
-                    '<button class="btn-a">7 8 9 | on("click")</button>' +
-                    '<button class="btn-b">10 11 12 | on("click") + apply</button>'
-                    ,
-        link: function(scope){
+angular.module('demo').
+    run(function($timeout){
+        $timeout(function(){
+            console.log('delay run');
             console.log(angular.element('.bindTimingTest .title').size()); //1
-            console.log(angular.element('.bindTimingTest .count').size()); //0
+            console.log(angular.element('.bindTimingTest .count').size()); //3
+        })
+    }).
+    directive('bindTimingParts', function(){
+        return {
+            scope: {
+                count: '='
+            },
+            template:   '<span class="title">count = </span>'+
+                        '<span class="count" ng-repeat="i in count">{{i}} </span>' +
+                        '<button ng-click="count = [4,5,6]">4 5 6 | ng-click</button>' +
+                        '<button class="btn-a">7 8 9 | on("click")</button>' +
+                        '<button class="btn-b">10 11 12 | on("click") + apply</button>'
+                        ,
+            link: function(scope){
+                console.log('start link');
+                console.log(angular.element('.bindTimingTest .title').size()); //1
+                console.log(angular.element('.bindTimingTest .count').size()); //0
 
-            angular.element('.bindTimingTest .btn-a').on('click', function(){
-                scope.count = [7,8,9]
-            })
-            angular.element('.bindTimingTest .btn-b').on('click', function(){
-                scope.$apply(function(){
-                    scope.count = [10,11,12]
+                angular.element('.bindTimingTest .btn-a').on('click', function(){
+                    scope.count = [7,8,9]
                 })
-            })
+                angular.element('.bindTimingTest .btn-b').on('click', function(){
+                    scope.$apply(function(){
+                        scope.count = [10,11,12]
+                    })
+                })
+            }
         }
-    }    
-});
+    });
 </textarea>
 
 </div>
 
-
+</div>
 <% include common/_foot %>

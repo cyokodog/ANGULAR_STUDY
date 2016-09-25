@@ -1,0 +1,105 @@
+<% include common/_head %>
+
+## Custom Filter
+
+<div ng-app="demo">
+
+
+
+
+
+<div class="ex-code-prettify">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+window.demo = angular.module('demo', ['ngSanitize']);
+</textarea>
+</div>
+
+
+
+
+### Basic
+
+フィルターは
+
+- 単一の値に適用できるもの
+- 配列に適用できるもの
+
+の２種類がある
+
+複数のフィルターを組み合わせて新しいフィルタを作ることもできる
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+
+<dl>
+  <dt>単一値</dt>
+  <dd>10*3 | simplexFilter: '(' : ')'</dd>
+  <dd>{{10*3 | simplexFilter: '(' : ')' }}</dd>
+
+  <dt>配列</dt>
+  <dd>value in [10,20,30] | arrayFilter --- value | simplexFilter: '(' : ')'</dd>
+  <dd ng-repeat="value in [10,20,30] | arrayFilter">{{value | simplexFilter: '(' : ')'}}</dd>
+
+  <dt>MIX (simplexFilter + arrayFilter + orderByFilter)</dt>
+  <dd>value in [10,20,30] | mixFilter: '[ ' : ' ]'"</dd>
+  <dd ng-repeat="value in [10,20,30] | mixFilter: '[ ' : ' ]'">{{value}}</dd>
+
+
+</dl>
+
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').filter('simplexFilter', function(){
+  return function(value, prefix, safix){
+    return (prefix || '') + value + (safix || '')
+  }
+})
+
+angular.module('demo').filter('arrayFilter', function(){
+  return function(array){
+    var newArray = []
+    array.forEach(function(value){
+      newArray.push(value.toString().split('').join('_'))
+    })
+    return newArray;
+  }
+})
+
+angular.module('demo').filter('mixFilter', function($filter){
+  return function(array, prefix, safix){
+    var simplexFilter = $filter('simplexFilter');
+    var arrayFilter = $filter('arrayFilter');
+    var orderBy = $filter('orderBy');
+    var newArray = arrayFilter(array)
+    newArray.forEach(function(value, i){
+      newArray[i] = simplexFilter(value, prefix, safix)
+    })
+    return orderBy(newArray, angular.identify, true);
+  }
+})
+
+
+
+</textarea>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+<% include common/_foot %>

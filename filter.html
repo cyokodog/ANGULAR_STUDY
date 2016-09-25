@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>AngularJS Tutorial</title>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.css" rel="stylesheet" type="text/css" media="screen" >
+	<link href="css/style.css" rel="stylesheet" type="text/css" media="screen" >
+</head>
+<body>
+
+<h1><a href="/">AngularJS STUDY</a></h1>
+
+<div class="l-contents">
+	<div class="l-article markdown">
+
+## Filter
+
+<div ng-app="demo">
+
+
+
+
+
+<div class="ex-code-prettify">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+window.demo = angular.module('demo', ['ngSanitize']);
+</textarea>
+</div>
+
+
+
+
+### Format
+
+日付や通貨の日本語表記は以下モジュールが必要。
+
+    bower install angular-i18n --save
+    bower_components/angular-i18n/angular-locale_ja-jp.js
+
+金額表示は i18n で日本表記になるが小数点以下の消し方が不明。”単位の絶対参照:小数点以下桁数”を指定することで回避できる。
+
+- [AngularJS の日本語対応 (angular-i18n) - Get Over Myself!](http://swinfield.hatenablog.com/entry/2014/09/15/AngularJS_%E3%81%AE%E6%97%A5%E6%9C%AC%E8%AA%9E%E5%AF%BE%E5%BF%9C_(angular-i18n))
+- [ angular-ui-grid で金額をエンマーク付き、小数点なしで表示するには - わからん](http://d.hatena.ne.jp/kitokitoki/20150219/p1)
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="formatFilterCtrl as vm">
+  <dl>
+    <dt>number</dt>
+    <dd>数値 | number</dd>
+    <dd>３桁毎にカンマ区切りで表示される</dd>
+    <dd>
+      525 * 33|number ⇒ {{525 * 33|number}}
+    </dd>
+
+    <dt>currency</dt>
+    <dd>数値 | currency</dd>
+    <dd>通貨フォーマットで表示される</dd>
+    <dd>
+      525 * 33|currency ⇒ {{525 * 33|currency}}
+    </dd>
+    <dd>
+      525 * 33|currency:'&#xa5;':0 ⇒ {{525 * 33|currency:'&#xa5;':0}}
+    </dd>
+
+    <dt>date</dt>
+    <dd>日付 | date:"yyyy/MM/dd"</dd>
+    <dd>日付フォーマットで表示される</dd>
+    <dd>
+      vm.today|date:"yyyy/MM/dd" ⇒ {{vm.today|date:"yyyy/MM/dd"}}
+    </dd>
+    <dd>
+      vm.today|date:"fullDate" ⇒ {{vm.today|date:"fullDate"}}
+    </dd>
+  </dl>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo').controller('formatFilterCtrl', function($scope){
+  var vm = this;
+  vm.today = new Date();
+})
+</textarea>
+</div>
+
+
+
+
+### ng-repeat 併用系（limitTo, orderBy）
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="repeatFilterCtrl as vm">
+  <p>vm.users.length = {{vm.users.length}} users.</p>
+  <ul>
+    <li ng-repeat="user in vm.users">{{user.score | number:2}} : {{user.name | uppercase}}</li>
+  </ul>
+
+  <p>limitTo:5 | orderBy:'-score' ← NG orderBy した後に絞るべき</p>
+  <ul>
+    <li ng-repeat="user in vm.users | limitTo:5 | orderBy:'-score'">{{user.score | number:2}} : {{user.name | uppercase}}</li>
+  </ul>
+
+  <p>orderBy:'-score' | limitTo:5 ← OK</p>
+  <ul>
+    <li ng-repeat="user in vm.users | orderBy:'-score' | limitTo:5">{{user.score | number:2}} : {{user.name | uppercase}}</li>
+  </ul>
+
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo').controller('repeatFilterCtrl', function($scope){
+  var vm = this;
+  vm.users = [
+    {'name':'yamada', 'score':51.2},
+    {'name':'suzuki', 'score':56.11},
+    {'name':'oda', 'score':53.43},
+    {'name':'yabe', 'score':51.3},
+    {'name':'yagi', 'score':31.1},
+    {'name':'tagawa', 'score':53.43}
+  ];
+})
+</textarea>
+</div>
+
+
+
+
+
+
+
+### Filtering
+
+increment 処理は、ng-repeat してる要素に専用コントローラーを割り当てることで、repeat対象となっているカレント行データに対し処理を行うことができる
+
+<div class="ex-code-prettify">
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+table{
+  background:#eee;
+}
+td{
+  padding:2px 4px;
+  background:#fff;
+}
+tr.even td{
+  background:#ddeeff;
+}
+tr.odd td{
+  background:#eefff0;
+}
+fieldset{
+  margin:4px 0;
+  border:solid 1px #eee;
+}
+</textarea>
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="fiteringFilterCtrl as vm">
+<fieldset>
+  <legend>Filtering</legend>
+  <p>
+    row: <input ng-model="vm.find"/>
+    name: <input ng-model="vm.find.name"/>
+    score: <input ng-model="vm.find.score"/>
+  </p>
+</fieldset>
+
+<table>
+  <thead><th>$index+1</th> <th>$first</th> <th>$middle</th> <th>$last</th><th>name</th> <th>score</th><th/><th>user | json</th></thead>
+  <tbody>
+    <tr ng-repeat="user in vm.users | filter : vm.find" ng-class-even="'even'" ng-class-odd="'odd'" ng-controller="fiteringRepeatCtrl as vm2">
+      <td>{{$index+1}}</td> <td>{{$first}}</td> <td>{{$middle}}</td> <td>{{$last}}</td> 
+      <td>{{user.name | uppercase}}</td><td>{{user.score | number:2}}</td>
+      <td><button ng-click="vm2.increment()">+1</button></td>
+      <td><pre>{{user|json}}</pre></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo').controller('fiteringFilterCtrl', function($scope){
+  var vm = this;
+  vm.users = [
+    {'name':'yamada', 'score':51.2},
+    {'name':'suzuki', 'score':56.11},
+    {'name':'oda', 'score':53.43},
+    {'name':'yabe', 'score':51.3},
+    {'name':'yagi', 'score':31.1},
+    {'name':'tagawa', 'score':53.43}
+  ];
+})
+angular.module('demo').controller('fiteringRepeatCtrl', function($scope){
+  var vm2 = this;
+  vm2.increment = function(){
+    $scope.user.score++
+  }
+})
+</textarea>
+</div>
+
+
+
+
+
+
+
+
+
+### Form
+
+
+
+
+
+
+- form に novalidate を指定し html5 の validate を無効化する。
+
+<div class="ex-code-prettify">
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+</textarea>
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="formFilterCtrl as vm">
+  <form novalidate name="myForm" ng-submit="vm.addUser()">
+    <p>
+      color :
+      <select
+        ng-model="user.color"
+        ng-init="user.color='red'"
+        ng-options="'=='+colors+'==' for colors in ['red','blue','pink']"
+      >
+      </select>
+    </p>
+    <p>
+      18+:
+      <input type="checkbox"
+        ng-model="user.adult"
+        ng-true-value="'adult'"
+        ng-false-value="'child'"
+      />
+    </p>
+    <p>
+      Phone:
+      <input type="radio" ng-model="user.phone" value="iPhone"> iPhone
+      <input type="radio" ng-model="user.phone" value="Android"> Android
+    </p>
+    <p>
+      Memo:
+      <input ng-model="user.memo" ng-maxlength="140" placeholder="本当はTEXTAREAを使う"/>
+      {{140 - user.memo.length}}
+    </p>
+    <p>
+      Name:
+      <input type="text" name="name" ng-model="user.name" required ng-minlength="5" ng-maxlength="8"/>
+      <span ng-show="myForm.name.$error.required">必須だよ！</span>
+      <span ng-show="myForm.name.$error.minlength">短いよ！</span>
+      <span ng-show="myForm.name.$error.maxlength">長いよ！</span>
+    </p>
+    <p>
+      Score:
+      <input name="score" type="number" ng-model="user.score"/>
+    </p>
+    <p>
+      Email:
+      <input type="email" name="email" ng-model="user.email"/>
+      <span ng-show="myForm.email.$error.email">emailだよ！</span>
+    </p>
+    <p>
+      Web:
+      <input type="url" name="url" ng-model="user.url"/>
+      <span ng-show="myForm.url.$error.url">urlだよ！</span>
+    </p>
+    <p>
+      <input type="submit" value="add"/>
+    </p>
+  </form>
+  <p>
+    <pre>{{user | json}}</pre>
+  </p>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo').controller('formFilterCtrl', function($scope){
+  var vm = this;
+  vm.addUser = function(){
+  }
+})
+</textarea>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+</div> <!-- l-article -->
+<div class="l-pageNav markdown">
+- Example
+	- [app](example/app)
+- LAB
+	- [lab](lab.html)
+- ADE(Application Devlopment Environment)
+	- [ng-annotate](ng_annotate.html)
+- Filter
+	- [Built in Filter](filter.html)
+	- [Custom Filter](custom-filter.html)
+- service
+	- [Service](service.html)
+- built-in-directive
+	- [Directive](directive.html)
+- custom directive
+	- [TODO](todo.html)
+	- [ComboBox](combobox.html)
+	- [Notification](notification.html)
+	- [Rating](rating.html)
+	- [Rating_ngModel](rating_ngmodel.html)
+	- [InplaceEditor](inplace_editor.html)
+	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+- test
+	- [karma](karma.html)
+
+</div>
+</div> <!-- l-contents -->
+
+
+
+<script src="js/lib/marked/lib/marked.js"></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
+<script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+
+<script src="bower_components/angular/angular.js"></script>
+<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.0/angular.js"></script>
+-->
+<script src="bower_components/angular-i18n/angular-locale_ja-jp.js"></script>
+
+
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+
+
+
+<script type='text/javascript' src='js/index.js'></script>
+
+
+<script>
+window.here = function(f){
+    return f.toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+}
+</script>
+
+
+</body>
+</html>
+

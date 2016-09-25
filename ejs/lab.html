@@ -1,0 +1,209 @@
+<% include common/_head %>
+<div ng-app="demo">
+
+<div class="ex-code-prettify" style="display:none">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo', []);
+</textarea>
+</div>
+
+## directive の controller での $element, ngModel の参照方法
+
+controller の初期化処理に link で受け取った el, attr を渡すようにしてたが。。。
+
+    link: function(scope, el, attr, ctrl){
+        ctrl.init(el, attr);
+    },
+    controller: function($scope) {
+        this.init = function(el, attr){
+        }
+    }
+
+el に関しては以下のように $element で DI できるので不要らしい。attr も DI できるのかな・・
+
+また、directive に割り当てた ngModel も scope を経由しなくても受け取れる
+
+でも http://blog.wacul.co.jp/blog/2014/08/15/angular-directive-priority/ を参照する限り link 経由のほうが無難かも
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="directiveReferCtrl as vm">
+    <input ng-model="vm.foo"/>
+    <directive-refer ng-model="vm.foo"/>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').
+controller("directiveReferCtrl", function() {
+    this.foo = 123;
+}).
+directive("directiveRefer", function() {
+  return {
+    restrict: 'E',
+    replace: true,
+    scope: true,
+    template: '<div>hasNgModel: {{hasNgModel}}<button ng-click="vm.show()">show</button></div>',
+    controllerAs: 'vm',
+    controller: function($scope, $element) {
+        var foo = $element.controller('ngModel');
+        $scope.hasNgModel = !!$element.controller('ngModel');
+
+        this.show = function(){
+console.log(foo)
+        }
+    }
+  };
+});
+</textarea>
+</div>
+
+
+
+
+
+
+## 動的ロードのテスト
+
+via:
+
+- http://stackoverflow.com/questions/21573634/angular-add-directives-after-angular-bootstrap
+- http://qiita.com/damele0n/items/4d941608e63b85beb8ca
+- http://qiita.com/cyclon2joker/items/980368d9bae6e56b8e87
+
+カスタムディレクティブを動的にDOM上に追加した場合
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="asyncLoad01DirectiveCtrl">
+    <async-load01-directive>NG...</async-load01-directive>
+    <div class="asyncLoad01addarea">ここに追加します</div>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+window.app = {
+    $compileProvider:''
+}
+angular.module('demo').config(function($compileProvider){
+    window.app = {
+        $compileProvider: $compileProvider
+    }
+});
+angular.module('demo').controller('asyncLoad01DirectiveCtrl', function ($scope,$compile) {
+    setTimeout(function(){
+        var el = angular.element('<async-load01-directive>NG...</async-load01-directive>')
+        var linkFunc = $compile(el);
+        el = linkFunc($scope)
+        $('.asyncLoad01addarea').append(el)
+    },3000)
+})
+angular.module('demo').directive('asyncLoad01Directive', function(){
+    return {
+        template: '<div>OK!</div>'
+    }
+});
+</textarea>
+</div>
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="asyncLoad02DirectiveCtrl">
+    <async-load02-directive>NG...</async-load02-directive>
+    <div class="asyncLoad02addarea">ここに追加します</div>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').controller('asyncLoad02DirectiveCtrl', function ($scope,$compile) {
+    setTimeout(function(){
+        window.app.$compileProvider.directive('asyncLoad02Directive', function () {
+            return {
+                template: '<div>OK!</div>'
+            }
+        });
+        var el = angular.element('async-load02-directive')
+        $compile(el);
+        var el = $compile("<async-load02-directive>NG...</async-load02-directive>")($scope);
+        $('.asyncLoad02addarea').append(el)
+    },3000)
+})
+setTimeout(function(){
+    angular.module('demo').directive('asyncLoad02Directive', function(){
+        return {
+            template: '<div>OK!</div>'
+        }
+    });
+},1000)
+
+</textarea>
+</div>
+
+
+
+
+
+
+## Element Destroy Test
+
+el.on('$destroy') の実行条件テスト。element を remove すると起動
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div el-destroy></div> <button ng-click="del()">del</button>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').directive('elDestroy', function(){
+    return {
+        template: '<div>hoge</div>',
+        link: function($scope, el, attr, ctrl){
+            el.on('$destroy', function(){
+                alert('element destroy')
+            })
+            $scope.del = function(){
+            //  $applyするとこける？？なぜ？
+            //  $scope.$apply(function(){
+                    el.remove();
+            //  })
+            }
+        }
+    }
+});
+</textarea>
+</div>
+
+## Scope Destroy Test
+
+<div class="ex-code-prettify">
+<textarea class="code css" data-ex-code-prettify-param="{codeType:'css'}">
+</textarea>
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+<div ng-controller="scopeDestroy1 as ctrl">
+    <div ng-repeat="i in hoge">
+        <span ng-controller="scopeDestroy2">{{i}}</span>
+    </div>
+    <button ng-click="ctrl.splice()">del</button>
+</div>
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo')
+    .controller('scopeDestroy1', function($scope){
+        var ctrl = this;
+        $scope.hoge = ['a','b']
+        ctrl.splice=function(){
+            $scope.hoge.splice(1,1)
+        }
+    })
+    .controller('scopeDestroy2', function($scope){
+        $scope.$on('$destroy', function(){
+            alert('scope destory')
+        })
+    })
+    ;
+</textarea>
+</div>
+
+
+</div>
+<% include common/_foot %>

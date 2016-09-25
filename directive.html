@@ -102,7 +102,7 @@ angular.module('demo').controller('sceCtrl', function($sce){
         script: 
             $sce.trustAs(
                 $sce.HTML,
-                '<div class="sceDemo"></div><script>$(".sceDemo").html("Script OK")</script>'
+                '<div class="sceDemo"></div><script>$(".sceDemo").html("This Text is Written by JavaScript.")</script>'
             )
     })
 
@@ -141,8 +141,17 @@ angular.module('demo').controller('sceCtrl', function($sce){
 
 </div> <!-- l-article -->
 <div class="l-pageNav markdown">
+- Example
+	- [app](example/app)
+- LAB
+	- [lab](lab.html)
 - ADE(Application Devlopment Environment)
 	- [ng-annotate](ng_annotate.html)
+- Filter
+	- [Built in Filter](filter.html)
+	- [Custom Filter](custom-filter.html)
+- service
+	- [Service](service.html)
 - built-in-directive
 	- [Directive](directive.html)
 - custom directive
@@ -153,6 +162,8 @@ angular.module('demo').controller('sceCtrl', function($sce){
 	- [Rating_ngModel](rating_ngmodel.html)
 	- [InplaceEditor](inplace_editor.html)
 	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+- test
+	- [karma](karma.html)
 
 </div>
 </div> <!-- l-contents -->
@@ -164,7 +175,15 @@ angular.module('demo').controller('sceCtrl', function($sce){
 <script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
 <script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
 <script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+
 <script src="bower_components/angular/angular.js"></script>
+<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.0/angular.js"></script>
+-->
+<script src="bower_components/angular-i18n/angular-locale_ja-jp.js"></script>
+
+
 <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
 
 

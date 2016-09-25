@@ -1,0 +1,172 @@
+<% include common/_head %>
+<div ng-app="demo">
+
+<div class="ex-code-prettify" style="display:none">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+angular.module('demo', []);
+</textarea>
+</div>
+
+
+## karma + Jasmine
+
+Angularでは、モートでのテスト実行、CIとの連携、コード変更監視してのテストの自動実行などが可能。
+ユニットテストしてみる。
+
+- Jasmine : テスティングフレームワーク
+- Karma : テストランナー
+
+### インストール
+
+    npm install karma --save-dev
+    npm install karma-jasmine --save-dev
+    npm install karma-chrome-launcher --save-dev
+    npm install -g karma-cli
+
+angular をテストする場合は以下もインストール
+
+    bower install angular-mocks --save-dev
+
+
+karma init で karma.conf.js を生成。
+filesの指定が重要。
+
+    bower_components/**/angular.js
+    bower_components/**/angular-mocks.js
+    app/**/*.js
+    app/**/*.spec.js
+
+karma.conf.js
+
+    module.exports = function(config) {
+      config.set({
+        basePath: '',
+        frameworks: ['jasmine'],
+        files: [
+          'bower_components/**/angular.js',
+          'bower_components/**/angular-mocks.js',
+          'app/**/*.js',
+          'app/**/*.spec.js'
+        ],
+        exclude: [
+        ],
+        preprocessors: {
+        },
+        reporters: ['progress'],
+        port: 9876,
+        colors: true,
+        logLevel: config.LOG_INFO,
+        autoWatch: true,
+        browsers: ['Chrome'],
+        singleRun: false
+      });
+    };
+
+
+
+### angularを使用しないテスト
+
+sample.spec.js
+
+    describe('テスト', function(){
+        it('わざとエラー', function(){
+            expect(1 + 1).toEqual(3)
+        })
+    });
+
+karma.conf.js の files に sample.spec.js を追加しテストを実行。
+
+    karma start karma.conf.js
+
+以下エラーが表示される。
+
+    Chrome 43.0.2357 (Mac OS X 10.10.0) テスト わざとエラー FAILED
+        Expected 2 to equal 3.
+            at Object.<anonymous> (/Users/cyokodog/Dev/bitbucket/github/ANGULAR_STUDY/example/sample.spec.js:3:23)
+    Chrome 43.0.2357 (Mac OS X 10.10.0): Executed 2 of 2 (1 FAILED) (0 secs / 0.021 secsChrome 43.0.2357 (Mac OS X 10.10.0): Executed 2 of 2 (1 FAILED) (0.026 secs / 0.021 secs)
+
+### カスタムフィルターのテスト
+
+以下プロジェクト構成を想定。
+
+    - project
+        karma.conf.js
+        - app
+            app.module.js
+            - filter
+                upper.filter.js
+                upper.filter.spec.js
+
+upper.filter.js ([demo](/example/app/))
+
+    angular.module('app').
+      filter('upper', function(){
+        return function(input){
+          return angular.uppercase(input);
+        }
+      })
+    ;
+
+upper.filter.spec.js
+
+    describe('upper filterのテスト', function(){
+        beforeEach(module('app'));
+        it('大文字に変換される', 
+            inject(
+                function($filter){
+                    var upperFilter = $filter('upper');
+                    expect(upperFilter('hello')).toEqual('HELLO')
+                }
+            )
+        )
+    })
+
+
+### コントローラーのテスト
+
+main.controller.js
+
+    ;(function(){
+      angular.module('app').controller('MainController', MainController)
+      function MainController($scope){
+        this.items = []
+        this.addItem = function(){
+          this.items.push($scope.item);
+        }
+      }  
+    })();
+
+main.controller.spec.js
+
+    describe('MainControllerのテスト', function(){
+        beforeEach(module('app'));
+
+        //事前にMainControllerを実行する
+        var scope, ctrl;
+        beforeEach(inject(function($controller, $rootScope){
+          scope = $rootScope.$new();
+          ctrl = $controller('MainController', {$scope: scope});
+        }));
+
+        describe('scope.items', function() {
+          it('itemsに配列が追加されること', function() {
+
+            scope.item = 'abc';
+            ctrl.addItem();
+
+            scope.item = 'efg';
+            ctrl.addItem();
+
+            expect(ctrl.items).toEqual(['abc','efg']);
+          });
+        });
+    })
+
+
+
+
+
+
+
+</div>
+<% include common/_foot %>

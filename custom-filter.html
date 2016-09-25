@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>AngularJS Tutorial</title>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.css" rel="stylesheet" type="text/css" media="screen" >
+	<link href="css/style.css" rel="stylesheet" type="text/css" media="screen" >
+</head>
+<body>
+
+<h1><a href="/">AngularJS STUDY</a></h1>
+
+<div class="l-contents">
+	<div class="l-article markdown">
+
+## Custom Filter
+
+<div ng-app="demo">
+
+
+
+
+
+<div class="ex-code-prettify">
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+window.demo = angular.module('demo', ['ngSanitize']);
+</textarea>
+</div>
+
+
+
+
+### Basic
+
+フィルターは
+
+- 単一の値に適用できるもの
+- 配列に適用できるもの
+
+の２種類がある
+
+複数のフィルターを組み合わせて新しいフィルタを作ることもできる
+
+<div class="ex-code-prettify">
+<textarea class="code html" data-ex-code-prettify-param="{codeType:'html'}">
+
+<dl>
+  <dt>単一値</dt>
+  <dd>10*3 | simplexFilter: '(' : ')'</dd>
+  <dd>{{10*3 | simplexFilter: '(' : ')' }}</dd>
+
+  <dt>配列</dt>
+  <dd>value in [10,20,30] | arrayFilter --- value | simplexFilter: '(' : ')'</dd>
+  <dd ng-repeat="value in [10,20,30] | arrayFilter">{{value | simplexFilter: '(' : ')'}}</dd>
+
+  <dt>MIX (simplexFilter + arrayFilter + orderByFilter)</dt>
+  <dd>value in [10,20,30] | mixFilter: '[ ' : ' ]'"</dd>
+  <dd ng-repeat="value in [10,20,30] | mixFilter: '[ ' : ' ]'">{{value}}</dd>
+
+
+</dl>
+
+</textarea>
+<textarea class="code script" data-ex-code-prettify-param="{codeType:'script'}">
+//<script>
+angular.module('demo').filter('simplexFilter', function(){
+  return function(value, prefix, safix){
+    return (prefix || '') + value + (safix || '')
+  }
+})
+
+angular.module('demo').filter('arrayFilter', function(){
+  return function(array){
+    var newArray = []
+    array.forEach(function(value){
+      newArray.push(value.toString().split('').join('_'))
+    })
+    return newArray;
+  }
+})
+
+angular.module('demo').filter('mixFilter', function($filter){
+  return function(array, prefix, safix){
+    var simplexFilter = $filter('simplexFilter');
+    var arrayFilter = $filter('arrayFilter');
+    var orderBy = $filter('orderBy');
+    var newArray = arrayFilter(array)
+    newArray.forEach(function(value, i){
+      newArray[i] = simplexFilter(value, prefix, safix)
+    })
+    return orderBy(newArray, angular.identify, true);
+  }
+})
+
+
+
+</textarea>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+</div> <!-- l-article -->
+<div class="l-pageNav markdown">
+- Example
+	- [app](example/app)
+- LAB
+	- [lab](lab.html)
+- ADE(Application Devlopment Environment)
+	- [ng-annotate](ng_annotate.html)
+- Filter
+	- [Built in Filter](filter.html)
+	- [Custom Filter](custom-filter.html)
+- service
+	- [Service](service.html)
+- built-in-directive
+	- [Directive](directive.html)
+- custom directive
+	- [TODO](todo.html)
+	- [ComboBox](combobox.html)
+	- [Notification](notification.html)
+	- [Rating](rating.html)
+	- [Rating_ngModel](rating_ngmodel.html)
+	- [InplaceEditor](inplace_editor.html)
+	- [InplaceEditor_transclude](inplace_editor_transclude.html)
+- test
+	- [karma](karma.html)
+
+</div>
+</div> <!-- l-contents -->
+
+
+
+<script src="js/lib/marked/lib/marked.js"></script>
+<script type='text/javascript' src='http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/google-code-prettify/prettify.js'></script>
+<script type='text/javascript' src='http://cyokodog.github.io/jquery.ex-code-prettify/jquery.ex-code-prettify.js'></script>
+<script type='text/javascript' src='js/lib/jquery.easy-code-prettify/jquery.easy-code-prettify.js'></script>
+
+<script src="bower_components/angular/angular.js"></script>
+<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.28/angular.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.0/angular.js"></script>
+-->
+<script src="bower_components/angular-i18n/angular-locale_ja-jp.js"></script>
+
+
+<script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+
+
+
+<script type='text/javascript' src='js/index.js'></script>
+
+
+<script>
+window.here = function(f){
+    return f.toString().match(/[^]*\/\*([^]*)\*\/\}$/)[1];
+}
+</script>
+
+
+</body>
+</html>
+

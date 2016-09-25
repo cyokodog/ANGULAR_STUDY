@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html ng-app="app">
+  <head>
+    <meta charset="utf-8"/>
+    <script type="text/javascript" src="../bower_components/angular/angular.js"></script>
+  </head>
+  <body>
+    <h2>Unit Test</h2>
+    <div ng-controller="MainController as vm">
+      <form ng-submit="vm.addItem()">
+        <input ng-model="item"/>
+        <input type="submit" value="Add Item"/>
+      </form>
+      <ul>
+        <li ng-repeat="i in vm.items">
+        {{i}} | upper --&gt; {{i | upper}}
+        </li>
+      </ul>
+    </div>
+
+    <h2>New Check</h2>
+    <div ng-controller="NewCheckController as vm">
+      <ul>
+        <li><new-check-directive></new-check-directive></li>
+        <li><strong>{{vm.factoryMsg}}</strong></li>
+        <li><strong>{{vm.serviceMsg}}</strong></li>
+      </ul>
+    </div>
+
+
+    <script type="text/javascript" src="app.module.js"></script>
+    <script type="text/javascript" src="new.check.js"></script>
+    <script type="text/javascript" src="filter/upper.filter.js"></script>
+    <script type="text/javascript" src="main/main-controller.js"></script>
+  </body>
+</html>
